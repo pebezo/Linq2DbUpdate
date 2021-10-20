@@ -4,3 +4,10 @@ services:
     build:
       context: .
       dockerfile: ./env/Dockerfile
+    depends_on:
+      - mysql
+  mysql:
+    env_file: ./env/mysqlcnf.conf
+    image: mysql/mysql-server:5.6
+    ports:
+      - "3344:3306"
