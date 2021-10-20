@@ -2,6 +2,13 @@
 Microsoft Visual Studio Solution File, Format Version 12.00
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Linq2DbUpdate", "Linq2DbUpdate\Linq2DbUpdate.csproj", "{ECA91AC5-435E-494C-BD17-B814EBE44280}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "env", "env", "{D923058F-BAC1-423C-8D06-D562BEF5F0DC}"
+ProjectSection(SolutionItems) = preProject
+	env\Dockerfile = env\Dockerfile
+	docker-compose.yml = docker-compose.yml
+	env\runner.sh = env\runner.sh
+EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
