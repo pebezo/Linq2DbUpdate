@@ -7,7 +7,11 @@ namespace Linq2DbUpdate
     {
         static void Main(string[] args)
         {
-            var summary = BenchmarkRunner.Run<UpdateBenchmark>();
+            // To run this benchmark you need Docker installed, from the command line run:
+            // docker-compose up --build
+            //var summary = BenchmarkRunner.Run<UpdateBenchmarkMySql>();
+            
+            var summary = BenchmarkRunner.Run<UpdateBenchmarkSqlite>();
    
             Console.WriteLine();
             Console.WriteLine("Done.");

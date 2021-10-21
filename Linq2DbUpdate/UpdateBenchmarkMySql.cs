@@ -1,36 +1,116 @@
 using System;
-using System.Linq;
 using BenchmarkDotNet.Attributes;
 using BenchmarkDotNet.Engines;
-using LinqToDB;
 using LinqToDB.Data;
-using LinqToDB.DataProvider.SQLite;
-using Microsoft.Data.Sqlite;
+using System.Linq;
+using LinqToDB;
 
 namespace Linq2DbUpdate
 {
     [MemoryDiagnoser]
-    [SimpleJob(RunStrategy.Throughput, warmupCount: 5, targetCount: 50)]
-    public class UpdateBenchmark
+    [SimpleJob(RunStrategy.Throughput, warmupCount: 1, targetCount: 10)]
+    public class UpdateBenchmarkMySql
     {
-        readonly SqliteConnection connection = CreateConnection();
+        [GlobalSetup]
+        public void CreateSqlTable()
+        {
+            Console.WriteLine("Setup...");
+            using (var db = new TestDatabase(ConnectionString, "MySql.Data"))
+            {
+                Console.WriteLine("Building test table");
+                db.Execute(@"                    
+                    CREATE TABLE `test`.`TestTable` (
+                        Id INT NOT NULL AUTO_INCREMENT,
+                        Column01 VARCHAR(100) NULL,
+                        Column02 VARCHAR(100) NULL,
+                        Column03 VARCHAR(100) NULL,
+                        Column04 VARCHAR(100) NULL,
+                        Column05 VARCHAR(100) NULL,
+                        Column06 VARCHAR(100) NULL,
+                        Column07 VARCHAR(100) NULL,
+                        Column08 VARCHAR(100) NULL,
+                        Column09 VARCHAR(100) NULL,
+                        Column10 VARCHAR(100) NULL,
+                        Column11 VARCHAR(100) NULL,
+                        Column12 VARCHAR(100) NULL,
+                        Column13 VARCHAR(100) NULL,
+                        Column14 VARCHAR(100) NULL,
+                        Column15 VARCHAR(100) NULL,
+                        Column16 VARCHAR(100) NULL,
+                        Column17 VARCHAR(100) NULL,
+                        Column18 VARCHAR(100) NULL,
+                        Column19 VARCHAR(100) NULL,
+                        Column20 INT NULL,
+                        Column21 INT NULL,
+                        Column22 INT NULL,
+                        Column23 INT NULL,
+                        Column24 INT NULL,
+                        Column25 INT NULL,
+                        Column26 INT NULL,
+                        Column27 INT NULL,
+                        Column28 INT NULL,
+                        Column29 INT NULL,
+                        Column30 DATETIME NULL,
+                        Column31 DATETIME NULL,
+                        Column32 DATETIME NULL,
+                        Column33 DATETIME NULL,
+                        Column34 DATETIME NULL,
+                        Column35 DATETIME NULL,
+                        Column36 DATETIME NULL,
+                        Column37 DATETIME NULL,
+                        Column38 DATETIME NULL,
+                        Column39 DATETIME NULL,
+                        Column40 TINYINT(1) NULL,
+                        Column41 TINYINT(1) NULL,
+                        Column42 TINYINT(1) NULL,
+                        Column43 TINYINT(1) NULL,
+                        Column44 TINYINT(1) NULL,
+                        Column45 TINYINT(1) NULL,
+                        Column46 TINYINT(1) NULL,
+                        Column47 TINYINT(1) NULL,
+                        Column48 TINYINT(1) NULL,
+                        Column49 TINYINT(1) NULL,
+                        Column50 DECIMAL(4,2) NULL,
+                        Column51 DECIMAL(4,2) NULL,
+                        Column52 DECIMAL(4,2) NULL,
+                        Column53 DECIMAL(4,2) NULL,
+                        Column54 DECIMAL(4,2) NULL,
+                        Column55 DECIMAL(4,2) NULL,
+                        Column56 DECIMAL(4,2) NULL,
+                        Column57 DECIMAL(4,2) NULL,
+                        Column58 DECIMAL(4,2) NULL,
+                        Column59 DECIMAL(4,2) NULL,
+                    PRIMARY KEY (`Id`));");
+            }
+        }
+        
+        [GlobalCleanup]
+        public static void DropSqlTable()
+        {
+            Console.WriteLine("Cleanup...");
+            using (var db = new TestDatabase(ConnectionString, "MySql.Data"))
+            {
+                Console.WriteLine("Dropping test table");
+                db.Execute("DROP TABLE `test`.`TestTable`");
+            }
+        }
         
         [Benchmark(Baseline = true)]
         public void Large_Compiled()
         {
-            using (var dc = new DataConnection(new SQLiteDataProvider("Microsoft.Data.Sqlite"), connection))
+            using (var db = new TestDatabase(ConnectionString, "MySql.Data"))
             {
-                compiledQuery(dc, BuildTestRecord());
+                compiledQuery(db, Values.BuildTestRecord());
             }
         }
 
         [Benchmark]
         public void Large_Regular()
         {
-            using (var dc = new DataConnection(new SQLiteDataProvider("Microsoft.Data.Sqlite"), connection))
+            using (var db = new TestDatabase(ConnectionString, "MySql.Data"))
             {
-                var record = BuildTestRecord();
-                dc.GetTable<TestTable>()
+                var record = Values.BuildTestRecord();
+                db.GetTable<TestTableNotNull>()
                     .Where(p => p.Id == record.Id)
                     .Set(i => i.Column01, record.Column01)
                     .Set(i => i.Column02, record.Column02)
@@ -94,145 +174,12 @@ namespace Linq2DbUpdate
                     .Update();
             }
         }
-
-        private static SqliteConnection CreateConnection()
-        {
-            var connection = new SqliteConnection("Data Source=:memory:");
-            connection.Open();
-            var cmdText = @"CREATE TABLE TestTable (
-                Id INT DEFAULT 0 NOT NULL,
-                Column01 CHAR(36) DEFAULT ' ' NOT NULL,
-                Column02 CHAR(100) DEFAULT ' ' NOT NULL,
-                Column03 CHAR(100) DEFAULT ' ' NOT NULL,
-                Column04 CHAR(100) DEFAULT ' ' NOT NULL,
-                Column05 CHAR(100) DEFAULT ' ' NOT NULL,
-                Column06 CHAR(100) DEFAULT ' ' NOT NULL,
-                Column07 CHAR(100) DEFAULT ' ' NOT NULL,
-                Column08 CHAR(100) DEFAULT ' ' NOT NULL,
-                Column09 CHAR(100) DEFAULT ' ' NOT NULL,
-                Column10 CHAR(100) DEFAULT ' ' NOT NULL,
-                Column11 CHAR(100) DEFAULT ' ' NOT NULL,
-                Column12 CHAR(100) DEFAULT ' ' NOT NULL,
-                Column13 CHAR(100) DEFAULT ' ' NOT NULL,
-                Column14 CHAR(100) DEFAULT ' ' NOT NULL,
-                Column15 CHAR(100) DEFAULT ' ' NOT NULL,
-                Column16 CHAR(100) DEFAULT ' ' NOT NULL,
-                Column17 CHAR(100) DEFAULT ' ' NOT NULL,
-                Column18 CHAR(100) DEFAULT ' ' NOT NULL,
-                Column19 CHAR(100) DEFAULT ' ' NOT NULL,
-                Column20 CHAR(100) DEFAULT ' ' NOT NULL,
-                Column21 CHAR(100) DEFAULT ' ' NOT NULL,
-                Column22 CHAR(100) DEFAULT ' ' NOT NULL,
-                Column23 CHAR(100) DEFAULT ' ' NOT NULL,
-                Column24 CHAR(100) DEFAULT ' ' NOT NULL,
-                Column25 CHAR(100) DEFAULT ' ' NOT NULL,
-                Column26 CHAR(100) DEFAULT ' ' NOT NULL,
-                Column27 CHAR(100) DEFAULT ' ' NOT NULL,
-                Column28 CHAR(100) DEFAULT ' ' NOT NULL,
-                Column29 CHAR(100) DEFAULT ' ' NOT NULL,
-                Column30 CHAR(100) DEFAULT ' ' NOT NULL,
-                Column31 CHAR(100) DEFAULT ' ' NOT NULL,
-                Column32 CHAR(100) DEFAULT ' ' NOT NULL,
-                Column33 CHAR(100) DEFAULT ' ' NOT NULL,
-                Column34 CHAR(100) DEFAULT ' ' NOT NULL,
-                Column35 CHAR(100) DEFAULT ' ' NOT NULL,
-                Column36 CHAR(100) DEFAULT ' ' NOT NULL,
-                Column37 CHAR(100) DEFAULT ' ' NOT NULL,
-                Column38 CHAR(100) DEFAULT ' ' NOT NULL,
-                Column39 CHAR(100) DEFAULT ' ' NOT NULL,
-                Column40 CHAR(100) DEFAULT ' ' NOT NULL,
-                Column41 CHAR(100) DEFAULT ' ' NOT NULL,
-                Column42 CHAR(100) DEFAULT ' ' NOT NULL,
-                Column43 CHAR(100) DEFAULT ' ' NOT NULL,
-                Column44 CHAR(100) DEFAULT ' ' NOT NULL,
-                Column45 CHAR(100) DEFAULT ' ' NOT NULL,
-                Column46 CHAR(100) DEFAULT ' ' NOT NULL,
-                Column47 CHAR(100) DEFAULT ' ' NOT NULL,
-                Column48 CHAR(100) DEFAULT ' ' NOT NULL,
-                Column49 CHAR(100) DEFAULT ' ' NOT NULL,
-                Column50 CHAR(100) DEFAULT ' ' NOT NULL,
-                Column51 CHAR(100) DEFAULT ' ' NOT NULL,
-                Column52 CHAR(100) DEFAULT ' ' NOT NULL,
-                Column53 CHAR(100) DEFAULT ' ' NOT NULL,
-                Column54 CHAR(100) DEFAULT ' ' NOT NULL,
-                Column55 CHAR(100) DEFAULT ' ' NOT NULL,
-                Column56 CHAR(100) DEFAULT ' ' NOT NULL,
-                Column57 CHAR(100) DEFAULT ' ' NOT NULL,
-                Column58 CHAR(100) DEFAULT ' ' NOT NULL,
-                Column59 CHAR(100) DEFAULT ' ' NOT NULL
-                )";
-            var cmd = new SqliteCommand(cmdText, connection);
-            cmd.ExecuteNonQuery();
-            return connection;
-        }
         
-        private static TestTable BuildTestRecord() => new TestTable
-        {
-            Id = 1,
-            Column01 = "value for c01",
-            Column02 = "value for c02",
-            Column03 = "value for c03",
-            Column04 = "value for c04",
-            Column05 = "value for c05",
-            Column06 = "value for c06",
-            Column07 = "value for c07",
-            Column08 = "value for c08",
-            Column09 = "value for c09",
-            Column10 = "value for c10",
-            Column11 = "value for c11",
-            Column12 = "value for c12",
-            Column13 = "value for c13",
-            Column14 = "value for c14",
-            Column15 = "value for c15",
-            Column16 = "value for c16",
-            Column17 = "value for c17",
-            Column18 = "value for c18",
-            Column19 = "value for c19",
-            Column20 = "value for c10",
-            Column21 = "value for c21",
-            Column22 = "value for c22",
-            Column23 = "value for c23",
-            Column24 = "value for c24",
-            Column25 = "value for c25",
-            Column26 = "value for c26",
-            Column27 = "value for c27",
-            Column28 = "value for c28",
-            Column29 = "value for c29",
-            Column30 = "value for c30",
-            Column31 = "value for c31",
-            Column32 = "value for c32",
-            Column33 = "value for c33",
-            Column34 = "value for c34",
-            Column35 = "value for c35",
-            Column36 = "value for c36",
-            Column37 = "value for c37",
-            Column38 = "value for c38",
-            Column39 = "value for c39",
-            Column40 = "value for c40",
-            Column41 = "value for c41",
-            Column42 = "value for c42",
-            Column43 = "value for c43",
-            Column44 = "value for c44",
-            Column45 = "value for c45",
-            Column46 = "value for c46",
-            Column47 = "value for c47",
-            Column48 = "value for c48",
-            Column49 = "value for c49",
-            Column50 = "value for c50",
-            Column51 = "value for c51",
-            Column52 = "value for c52",
-            Column53 = "value for c53",
-            Column54 = "value for c54",
-            Column55 = "value for c55",
-            Column56 = "value for c56",
-            Column57 = "value for c57",
-            Column58 = "value for c58",
-            Column59 = "value for c59",
-        };
+        private static string ConnectionString => "Server=localhost;Port=3344;Uid=root;Pwd=password;Database=test;SslMode=none;Pooling=True;CharSet=utf8mb4;Convert Zero Datetime=True;";
         
-        private static readonly Func<DataConnection, TestTable, int> compiledQuery 
-            = CompiledQuery.Compile((DataConnection ctx, TestTable record) =>
-                ctx.GetTable<TestTable>()
+        private static readonly Func<DataConnection, TestTableNotNull, int> compiledQuery 
+            = CompiledQuery.Compile((DataConnection ctx, TestTableNotNull record) =>
+                ctx.GetTable<TestTableNotNull>()
                     .Where(i => i.Id == record.Id)
                     .Set(i => i.Column01, record.Column01)
                     .Set(i => i.Column02, record.Column02)
